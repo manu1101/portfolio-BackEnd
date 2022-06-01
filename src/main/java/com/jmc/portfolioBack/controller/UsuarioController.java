@@ -14,8 +14,8 @@ public class UsuarioController {
     @Autowired
     private IUsuarioService usuServ;
     
-    @PostMapping("/iniciar-sesion")
-    public String obtenerUsuario(@RequestBody Usuario usu){
-        return usu.getUsuario();
+    @PostMapping("/iniciar")
+    public Usuario obtenerUsuario(@RequestBody Long id){
+        return usuServ.verUsuario(id);
     }
 }
