@@ -16,17 +16,33 @@ public class Usuario {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-    private String usuario;
+    private String username;
     private String password;
-    private String rol;
 
-    public Usuario(Long id, String usuario, String password, String rol) {
+ 
+    public Usuario(Long id, String username, String password) {
         this.id = id;
-        this.usuario = usuario;
+        this.username = username;
         this.password = password;
-        this.rol = rol;
     }
 
     public Usuario() {
     }
+    
+    public String getUsername() {
+		return username;
+	}
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
 }

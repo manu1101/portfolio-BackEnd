@@ -2,11 +2,30 @@
 package com.jmc.portfolioBack.service;
 
 import com.jmc.portfolioBack.model.Usuario;
+import com.jmc.portfolioBack.repository.UsuarioRepository;
+import static java.util.Collections.emptyList;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-public interface IUsuarioService {
-    
-    public Usuario verUsuario(Long id);
-    
-    public void crearUsuario(Usuario usu);
+@Service
+public class IUsuarioService implements UserDetailsService {
+
+	private UsuarioRepository usuarioRepository;
+
+	public IUsuarioService(UsuarioRepository usuarioRepository) {
+		this.usuarioRepository = usuarioRepository;
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Usuario usuario = usuarioRepository.findByUsername(username);
+		if (usuario == null) {
+			throw new UsernameNotFoundException(username);
+		}
+		return new User(usuario.getUsername(), usuario.getPassword(), emptyList());
+	}
 }
