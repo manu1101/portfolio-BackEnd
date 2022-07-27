@@ -36,7 +36,7 @@ public class UsuarioController {
                 return usuarioRepository.findAll();
         }
 
-        @GetMapping("/usuarios/{usuario}")
+        @GetMapping("/usuarios/{username}")
         public Usuario getUsuario(@PathVariable String usu) {
                 return usuarioRepository.findByUsername(usu);
         }

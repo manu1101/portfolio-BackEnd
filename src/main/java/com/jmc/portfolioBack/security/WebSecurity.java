@@ -12,10 +12,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+/**
+ *
+ * @author PC
+ */
 @Configuration
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
@@ -54,12 +55,5 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         public void configure(AuthenticationManagerBuilder auth) throws Exception {
                 // Se define la clase que recupera los usuarios y el algoritmo para procesar las passwords
                 auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-        }
-
-        @Bean
-        CorsConfigurationSource corsConfigurationSource() {
-                final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
-                return source;
         }
 }
