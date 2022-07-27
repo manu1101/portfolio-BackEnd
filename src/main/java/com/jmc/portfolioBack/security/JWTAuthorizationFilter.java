@@ -30,18 +30,19 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
             throws IOException, ServletException {
         String header = req.getHeader(HEADER_AUTHORIZACION_KEY);
         if (header == null || !header.startsWith(TOKEN_BEARER_PREFIX)) {
+            HttpServletResponse response = (HttpServletResponse) res;
+            response.setHeader("Access-Control-Allow-Origin",
+                    "my-authorized-proxy-or-domain");
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET");
+            response.setHeader("Access-Control-Max-Age", "3600");
+            response.setHeader("Access-Control-Allow-Headers",
+                    "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
             chain.doFilter(req, res);
             return;
         }
         UsernamePasswordAuthenticationToken authentication = getAuthentication(req);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        HttpServletResponse response = (HttpServletResponse) res;
-        response.setHeader("Access-Control-Allow-Origin",
-                "my-authorized-proxy-or-domain");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET");
-        response.setHeader("Access-Control-Max-Age", "3600");
-        response.setHeader("Access-Control-Allow-Headers",
-                "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+        
         chain.doFilter(req, res);
     }
 
