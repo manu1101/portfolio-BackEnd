@@ -1,6 +1,5 @@
 package com.jmc.portfolioBack.security;
 
-
 import static com.jmc.portfolioBack.security.Constants.LOGIN_URL;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-/**
- *
- * @author PC
- */
 @Configuration
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
@@ -43,6 +38,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                  */
                 httpSecurity
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                        .cors().and()
                         .csrf().disable()
                         .authorizeRequests().antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
                         .anyRequest().authenticated().and()
