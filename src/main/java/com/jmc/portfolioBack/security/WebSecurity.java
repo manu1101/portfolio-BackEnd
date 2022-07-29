@@ -45,10 +45,4 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                                 .addFilter(new JWTAuthorizationFilter(authenticationManager()));
         }
-
-        @Override
-        public void configure(AuthenticationManagerBuilder auth) throws Exception {
-                // Se define la clase que recupera los usuarios y el algoritmo para procesar las passwords
-                auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
-        }
 }
