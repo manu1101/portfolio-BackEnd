@@ -1,11 +1,8 @@
 package com.jmc.portfolioBack.controller;
 
 import com.jmc.portfolioBack.payload.LoginRequest;
-import com.jmc.portfolioBack.payload.MessageResponse;
-import com.jmc.portfolioBack.payload.UserInfoResponse;
-import com.jmc.portfolioBack.repository.UsuarioRepository;
-import com.jmc.portfolioBack.security.JWT;
-import com.jmc.portfolioBack.service.IUsuarioService;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -24,16 +21,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.jmc.portfolioBack.payload.MessageResponse;
+import com.jmc.portfolioBack.payload.UserInfoResponse;
+import com.jmc.portfolioBack.repository.RoleRepository;
+import com.jmc.portfolioBack.repository.UsuarioRepository;
+import com.jmc.portfolioBack.security.JWT;
+import com.jmc.portfolioBack.service.DetallesUsuario;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 36000)
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/api/login")
 public class UsuarioController {
   @Autowired
   AuthenticationManager authenticationManager;
 
   @Autowired
   UsuarioRepository userRepository;
+
+  @Autowired
+  RoleRepository roleRepository;
 
   @Autowired
   PasswordEncoder encoder;
@@ -49,13 +55,19 @@ public class UsuarioController {
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    IUsuarioService userDetails = (IUsuarioService) authentication.getPrincipal();
+    DetallesUsuario userDetails = (DetallesUsuario) authentication.getPrincipal();
 
     ResponseCookie jwtCookie = jWT.generateJwtCookie(userDetails);
 
+    List<String> roles = userDetails.getAuthorities().stream()
+        .map(item -> item.getAuthority())
+        .collect(Collectors.toList());
+
     return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
         .body(new UserInfoResponse(userDetails.getId(),
-                                   userDetails.getUsername()));
+                                   userDetails.getUsername(),
+                                   userDetails.getEmail(),
+                                   roles));
   }
 
   @PostMapping("/cerrar-sesion")

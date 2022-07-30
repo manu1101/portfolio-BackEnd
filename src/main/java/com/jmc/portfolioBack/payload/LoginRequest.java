@@ -1,5 +1,6 @@
 package com.jmc.portfolioBack.payload;
 
+
 import javax.validation.constraints.NotBlank;
 
 public class LoginRequest {

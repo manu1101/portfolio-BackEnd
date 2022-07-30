@@ -1,7 +1,7 @@
 package com.jmc.portfolioBack.security;
 
-import com.jmc.portfolioBack.service.IUsuarioService;
-import com.jmc.portfolioBack.service.UsuarioService;
+
+import com.jmc.portfolioBack.service.DetallesUsuario;
 import java.util.Date;
 
 import javax.servlet.http.Cookie;
@@ -20,13 +20,13 @@ import io.jsonwebtoken.*;
 public class JWT {
   private static final Logger logger = LoggerFactory.getLogger(JWT.class);
 
-  @Value("${bezkoder.app.jwtSecret}")
+  @Value("${jwtSecretKey}")
   private String jwtSecret;
 
-  @Value("${bezkoder.app.jwtExpirationMs}")
+  @Value("${jwtExpiration}")
   private int jwtExpirationMs;
 
-  @Value("${bezkoder.app.jwtCookieName}")
+  @Value("${jwtCookieName}")
   private String jwtCookie;
 
   public String getJwtFromCookies(HttpServletRequest request) {
@@ -38,7 +38,7 @@ public class JWT {
     }
   }
 
-  public ResponseCookie generateJwtCookie(IUsuarioService userPrincipal) {
+  public ResponseCookie generateJwtCookie(DetallesUsuario userPrincipal) {
     String jwt = generateTokenFromUsername(userPrincipal.getUsername());
     ResponseCookie cookie = ResponseCookie.from(jwtCookie, jwt).path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
     return cookie;
@@ -58,15 +58,15 @@ public class JWT {
       Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
       return true;
     } catch (SignatureException e) {
-      logger.error("JWT firma inválida: {}", e.getMessage());
+      logger.error("Invalid JWT signature: {}", e.getMessage());
     } catch (MalformedJwtException e) {
-      logger.error("JWT inválido: {}", e.getMessage());
+      logger.error("Invalid JWT token: {}", e.getMessage());
     } catch (ExpiredJwtException e) {
-      logger.error("JWT expirado: {}", e.getMessage());
+      logger.error("JWT token is expired: {}", e.getMessage());
     } catch (UnsupportedJwtException e) {
-      logger.error("JWT no soportado: {}", e.getMessage());
+      logger.error("JWT token is unsupported: {}", e.getMessage());
     } catch (IllegalArgumentException e) {
-      logger.error("JWT texto vacio: {}", e.getMessage());
+      logger.error("JWT claims string is empty: {}", e.getMessage());
     }
 
     return false;
@@ -80,8 +80,4 @@ public class JWT {
         .signWith(SignatureAlgorithm.HS512, jwtSecret)
         .compact();
   }
-
-    public ResponseCookie generateJwtCookie(UsuarioService userDetails) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 }

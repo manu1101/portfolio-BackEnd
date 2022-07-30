@@ -1,6 +1,5 @@
 package com.jmc.portfolioBack.security;
 
-import com.jmc.portfolioBack.service.IUsuarioService;
 import com.jmc.portfolioBack.service.UsuarioService;
 import java.io.IOException;
 
@@ -18,22 +17,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
   @Autowired
-  private JWT jwtUtils;
+  private JWT jWT;
 
   @Autowired
   private UsuarioService userDetailsService;
 
-  private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+  private static final Logger logger = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
       String jwt = parseJwt(request);
-      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwt);
+      if (jwt != null && jWT.validateJwtToken(jwt)) {
+        String username = jWT.getUserNameFromJwtToken(jwt);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         
@@ -54,7 +54,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
   }
 
   private String parseJwt(HttpServletRequest request) {
-    String jwt = jwtUtils.getJwtFromCookies(request);
+    String jwt = jWT.getJwtFromCookies(request);
     return jwt;
   }
 }

@@ -20,7 +20,7 @@ public class UsuarioService implements UserDetailsService {
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     Usuario user = userRepository.findByUsername(username);
 
-    return IUsuarioService.build(user);
+    return DetallesUsuario.build(user);
   }
 
 }
