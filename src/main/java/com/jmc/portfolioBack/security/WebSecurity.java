@@ -18,8 +18,7 @@ import com.jmc.portfolioBack.service.UsuarioService;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurity extends WebSecurityConfigurerAdapter {
   @Autowired
   UsuarioService userDetailsService;

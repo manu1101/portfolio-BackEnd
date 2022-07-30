@@ -15,10 +15,11 @@ public class UsuarioService implements UserDetailsService {
   @Autowired
   UsuarioRepository userRepository;
 
-  @Override
+    @Override
   @Transactional
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Usuario user = userRepository.findByUsername(username);
+     Usuario user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
     return DetallesUsuario.build(user);
   }
