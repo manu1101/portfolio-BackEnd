@@ -1,63 +1,42 @@
 package com.jmc.portfolioBack.security;
-
-
-import static com.jmc.portfolioBack.security.Constants.HEADER_AUTHORIZACION_KEY;
-import static com.jmc.portfolioBack.security.Constants.ISSUER_INFO;
-import static com.jmc.portfolioBack.security.Constants.SUPER_SECRET_KEY;
-import static com.jmc.portfolioBack.security.Constants.TOKEN_BEARER_PREFIX;
-import static com.jmc.portfolioBack.security.Constants.TOKEN_EXPIRATION_TIME;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
-import com.jmc.portfolioBack.model.Usuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+@Component
+public class JWTAuthenticationFilter implements AuthenticationEntryPoint {
 
+  private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
 
-public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+  @Override
+  public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+      throws IOException, ServletException {
+    logger.error("Unauthorized error: {}", authException.getMessage());
 
-	private AuthenticationManager authenticationManager;
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
-		this.authenticationManager = authenticationManager;
-	}
+    final Map<String, Object> body = new HashMap<>();
+    body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+    body.put("error", "Unauthorized");
+    body.put("message", authException.getMessage());
+    body.put("path", request.getServletPath());
 
-	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException {
-		try {
-			Usuario credenciales = new ObjectMapper().readValue(request.getInputStream(), Usuario.class);
+    final ObjectMapper mapper = new ObjectMapper();
+    mapper.writeValue(response.getOutputStream(), body);
+  }
 
-			return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-					credenciales.getUsername(), credenciales.getPassword(), new ArrayList<>()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-			Authentication auth) throws IOException, ServletException {
-
-		String token = Jwts.builder().setIssuedAt(new Date()).setIssuer(ISSUER_INFO)
-				.setSubject(((User)auth.getPrincipal()).getUsername())
-				.signWith(SignatureAlgorithm.HS512, SUPER_SECRET_KEY).compact();
-		response.addHeader(HEADER_AUTHORIZACION_KEY, TOKEN_BEARER_PREFIX + " " + token);
-	}
 }

@@ -1,8 +1,7 @@
 package com.jmc.portfolioBack.security;
 
-import static com.jmc.portfolioBack.security.Constants.HEADER_AUTHORIZACION_KEY;
-import static com.jmc.portfolioBack.security.Constants.TOKEN_BEARER_PREFIX;
-
+import com.jmc.portfolioBack.service.IUsuarioService;
+import com.jmc.portfolioBack.service.UsuarioService;
 import java.io.IOException;
 
 import javax.servlet.FilterChain;
@@ -10,30 +9,52 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+public class JWTAuthorizationFilter extends OncePerRequestFilter {
+  @Autowired
+  private JWT jwtUtils;
 
-    public JWTAuthorizationFilter(AuthenticationManager authManager) {
-        super(authManager);
-    }
+  @Autowired
+  private UsuarioService userDetailsService;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
-        String header = req.getHeader(HEADER_AUTHORIZACION_KEY);
-        if (header == null || !header.startsWith(TOKEN_BEARER_PREFIX)) {
-            HttpServletResponse response = (HttpServletResponse) res;
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Methods", "*");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setHeader("Access-Control-Allow-Headers",
-                    "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-            chain.doFilter(req, res);
-            return;
-        }
+  private static final Logger logger = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
+
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
+    try {
+      String jwt = parseJwt(request);
+      if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+        String username = jwtUtils.getUserNameFromJwtToken(jwt);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         
-        chain.doFilter(req, res);
+        UsernamePasswordAuthenticationToken authentication = 
+            new UsernamePasswordAuthenticationToken(userDetails,
+                                                    null,
+                                                    userDetails.getAuthorities());
+        
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      }
+    } catch (Exception e) {
+      logger.error("Cannot set user authentication: {}", e);
     }
+
+    filterChain.doFilter(request, response);
+  }
+
+  private String parseJwt(HttpServletRequest request) {
+    String jwt = jwtUtils.getJwtFromCookies(request);
+    return jwt;
+  }
 }

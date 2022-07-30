@@ -26,7 +26,16 @@ public class Usuario {
         this.password = password;
     }
 
+    
     public Usuario() {
+    }
+    
+    public Long getId(){
+        return id;
+    }
+    
+    public void setId(Long id){
+        this.id = id;
     }
     
     public String getUsername() {

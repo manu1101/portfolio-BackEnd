@@ -1,48 +1,62 @@
 package com.jmc.portfolioBack.security;
 
-import static com.jmc.portfolioBack.security.Constants.LOGIN_URL;
+import com.jmc.portfolioBack.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(
+    prePostEnabled = true)
 public class WebSecurity extends WebSecurityConfigurerAdapter {
+  @Autowired
+  UsuarioService userDetailsService;
 
-        private UserDetailsService userDetailsService;
+  @Autowired
+  private JWTAuthenticationFilter unauthorizedHandler;
 
-        public WebSecurity(UserDetailsService userDetailsService) {
-                this.userDetailsService = userDetailsService;
-        }
+  @Bean
+  public JWTAuthorizationFilter authenticationJwtTokenFilter() {
+    return new JWTAuthorizationFilter();
+  }
 
-        @Bean
-        public BCryptPasswordEncoder bCryptPasswordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
+  @Override
+  public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+  }
 
-        @Override
-        protected void configure(HttpSecurity httpSecurity) throws Exception {
-                /*
-                 * 1. Se desactiva el uso de cookies
-                 * 2. Se activa la configuración CORS con los valores por defecto
-                 * 3. Se desactiva el filtro CSRF
-                 * 4. Se indica que el login no requiere autenticación
-                 * 5. Se indica que el resto de URLs esten securizadas
-                 */
-                httpSecurity
-                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                        .cors().and()
-                        .csrf().disable()
-                        .authorizeRequests().antMatchers(HttpMethod.POST, LOGIN_URL).permitAll()
-                        .anyRequest().authenticated().and()
-                                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
-                                .addFilter(new JWTAuthorizationFilter(authenticationManager()));
-        }
+  @Bean
+  @Override
+  public AuthenticationManager authenticationManagerBean() throws Exception {
+    return super.authenticationManagerBean();
+  }
+
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http.cors().and().csrf().disable()
+      .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
+      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+      .authorizeRequests().antMatchers("/login/**").permitAll()
+      .antMatchers("/login/**").permitAll()
+      .anyRequest().authenticated();
+
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+  }
 }
