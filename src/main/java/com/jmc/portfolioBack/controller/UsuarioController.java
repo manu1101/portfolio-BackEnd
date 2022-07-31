@@ -54,27 +54,21 @@ public class UsuarioController {
   JWT jWT;
 
   @PostMapping("/iniciar-sesion")
-  public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-
-    Authentication authentication = authenticationManager
-        .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    DetallesUsuario userDetails = (DetallesUsuario) authentication.getPrincipal();
-
-    ResponseCookie jwtCookie = jWT.generateJwtCookie(userDetails);
-
-    List<String> roles = userDetails.getAuthorities().stream()
-        .map(item -> item.getAuthority())
-        .collect(Collectors.toList());
-
-    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-        .body(new UserInfoResponse(userDetails.getId(),
-                                   userDetails.getUsername(),
-                                   userDetails.getEmail(),
-                                   roles));
-  }
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        DetallesUsuario userDetails = (DetallesUsuario) authentication.getPrincipal();
+        ResponseCookie jwtCookie = jWT.generateJwtCookie(userDetails);
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(new UserInfoResponse(userDetails.getId(),
+                        userDetails.getUsername(),
+                        userDetails.getEmail(),
+                        roles));
+    }
  
 
   @PostMapping("/crear-usuario")
