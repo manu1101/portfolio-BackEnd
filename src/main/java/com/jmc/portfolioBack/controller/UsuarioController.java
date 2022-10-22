@@ -37,7 +37,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/login")
 
-@CrossOrigin(origins = {"https://portfolio-caballerojm.web.app"}, maxAge = 36000)
+@CrossOrigin(origins = "https://portfolio-caballerojm.web.app", allowCredentials = "true", allowedHeaders = "*")
 
 public class UsuarioController {
   @Autowired
