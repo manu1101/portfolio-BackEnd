@@ -37,7 +37,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/login")
 
-@CrossOrigin(origins = "https://portfolio-caballerojm.web.app", allowCredentials = "true", allowedHeaders = "*")
+@CrossOrigin(origins = {"https://portfolio-caballerojm.web.app", "http://localhost:4200"}, allowCredentials = "true", allowedHeaders = "*")
 
 public class UsuarioController {
 
