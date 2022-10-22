@@ -34,9 +34,12 @@ import com.jmc.portfolioBack.service.DetallesUsuario;
 import java.util.HashSet;
 import java.util.Set;
 
-@CrossOrigin(origins = "https://portfolio-caballerojm.web.app", maxAge = 36000)
+@CrossOrigin(origins = {"https://portfolio-caballerojm.web.app"},
+        methods = {RequestMethod.GET, RequestMethod.POST},
+        maxAge = 36000)
 @RestController
 @RequestMapping("/api/login")
+
 public class UsuarioController {
   @Autowired
   AuthenticationManager authenticationManager;

@@ -29,8 +29,6 @@ public class JWTAuthenticationFilter implements AuthenticationEntryPoint {
 
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-    response.setHeader("Access-Control-Allow-Origins", "https://portfolio-caballerojm.web.app");
-    response.setHeader("Access-Control-Allow-Credentials", "true");
 
     final Map<String, Object> body = new HashMap<>();
     body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
